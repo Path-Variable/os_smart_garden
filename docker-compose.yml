@@ -1,0 +1,77 @@
+version: '3.9'
+services:
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    ports:
+      - "1884:1883"
+    volumes:
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+      - ./mosquitto_conf:/mosquitto/config
+
+  influxdb:
+    image: influxdb:latest
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_ADMIN}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_TOKEN=${INFLUXDB_TOKEN}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET}
+    volumes:
+      - type: volume
+        source: influxdb-data
+        target: /var/lib/influxdb
+      - type: volume
+        source: influxdb-config
+        target: /etc/influxdb
+
+  mqtt-publisher:
+    image: mqtt-pub-java:latest
+    depends_on:
+      - mosquitto
+    environment:
+      - MQTT_ADDR=tcp://mosquitto:1883
+      - MQTT_TOPIC=${MQTT_TOPIC}
+
+  mqtt-influx-scrapper:
+    image: mqtt-influx-scrapper:latest
+    depends_on:
+      - mosquitto
+      - influxdb
+    environment:
+      - MQTT_ADDR=tcp://mosquitto:1883
+      - MQTT_TOPIC=${MQTT_TOPIC}
+      - INFLUX_URL=http://influxdb:8086
+      - INFLUX_TOKEN=${INFLUXDB_TOKEN}
+      - INFLUX_ORG=${INFLUXDB_ORG}
+      - INFLUX_BUCKET=${INFLUXDB_BUCKET}
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - '3001:3000'
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - influxdb
+      - mosquitto
+      - mqtt-influx-scrapper
+      - mqtt-publisher
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_TOKEN}
+
+volumes:
+  mosquitto-data:
+  mosquitto-log:
+  mosquitto-config:
+  influxdb-data:
+  influxdb-config:
+  grafana-storage:
+
