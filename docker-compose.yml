@@ -45,7 +45,7 @@ services:
       - MQTT_ADDR=tcp://mosquitto:1883
       - MQTT_TOPIC=${MQTT_TOPIC}
       - INFLUX_URL=http://influxdb:8086
-      - INFLUX_TOKEN=${INFLUXDB_TOKEN}
+      - INFLUX_TOKEN=${BUCKET_TOKEN}
       - INFLUX_ORG=${INFLUXDB_ORG}
       - INFLUX_BUCKET=${INFLUXDB_BUCKET}
 
