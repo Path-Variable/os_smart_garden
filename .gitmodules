@@ -1,0 +1,6 @@
+[submodule "mqtt-influx-scrapper"]
+	path = mqtt-influx-scrapper
+	url = git@github.com:Path-Variable/mqtt-influx-scrapper.git
+[submodule "mqtt-pub-java"]
+	path = mqtt-pub-java
+	url = git@github.com:isaric/mqtt-pub-java.git
