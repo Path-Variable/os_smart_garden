@@ -10,31 +10,35 @@ services:
       - ./mosquitto_conf:/mosquitto/config
 
   influxdb:
-    image: influxdb:latest
+    image: influxdb:2
     ports:
-      - "8086:8086"
+      - 8086:8086
     environment:
-      - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_ADMIN}
-      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_PASSWORD}
-      - DOCKER_INFLUXDB_INIT_TOKEN=${INFLUXDB_TOKEN}
-      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG}
-      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET}
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME_FILE: /run/secrets/influxdb2-admin-username
+      DOCKER_INFLUXDB_INIT_PASSWORD_FILE: /run/secrets/influxdb2-admin-password
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN_FILE: /run/secrets/influxdb2-admin-token
+      DOCKER_INFLUXDB_INIT_ORG: ${INFLUXDB_ORG}
+      DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUXDB_BUCKET}
+    secrets:
+      - influxdb2-admin-username
+      - influxdb2-admin-password
+      - influxdb2-admin-token
     volumes:
       - type: volume
-        source: influxdb-data
-        target: /var/lib/influxdb
+        source: influxdb2-data
+        target: /var/lib/influxdb2
       - type: volume
-        source: influxdb-config
-        target: /etc/influxdb
+        source: influxdb2-config
+        target: /etc/influxdb2
 
   mqtt-publisher:
     image: mqtt-pub-java:latest
     depends_on:
       - mosquitto
     environment:
-      - MQTT_ADDR=tcp://mosquitto:1883
-      - MQTT_TOPIC=${MQTT_TOPIC}
+      MQTT_ADDR: tcp://mosquitto:1883
+      MQTT_TOPIC: ${MQTT_TOPIC}
 
   mqtt-influx-scrapper:
     image: mqtt-influx-scrapper:latest
@@ -42,12 +46,14 @@ services:
       - mosquitto
       - influxdb
     environment:
-      - MQTT_ADDR=tcp://mosquitto:1883
-      - MQTT_TOPIC=${MQTT_TOPIC}
-      - INFLUX_URL=http://influxdb:8086
-      - INFLUX_TOKEN=${BUCKET_TOKEN}
-      - INFLUX_ORG=${INFLUXDB_ORG}
-      - INFLUX_BUCKET=${INFLUXDB_BUCKET}
+      MQTT_ADDR: tcp://mosquitto:1883
+      MQTT_TOPIC: ${MQTT_TOPIC}
+      INFLUX_URL: http://influxdb:8086
+      INFLUX_TOKEN: ${INFLUXDB_TOKEN}
+      INFLUX_ORG: ${INFLUXDB_ORG}
+      INFLUX_BUCKET: ${INFLUXDB_BUCKET}
+    secrets:
+      - influxdb2-admin-token
 
   grafana:
     image: grafana/grafana:latest
@@ -61,17 +67,27 @@ services:
       - mqtt-influx-scrapper
       - mqtt-publisher
     environment:
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
-      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG}
-      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET}
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_TOKEN}
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      DOCKER_INFLUXDB_INIT_ORG: ${INFLUXDB_ORG}
+      DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUXDB_BUCKET}
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN_FILE: /run/secrets/influxdb2-admin-token
+    secrets:
+      - influxdb2-admin-token
+
+secrets:
+  influxdb2-admin-username:
+    file: .env.influxdb2-admin-username
+  influxdb2-admin-password:
+    file: .env.influxdb2-admin-password
+  influxdb2-admin-token:
+    file: .env.influxdb2-admin-token
 
 volumes:
   mosquitto-data:
   mosquitto-log:
   mosquitto-config:
-  influxdb-data:
-  influxdb-config:
+  influxdb2-data:
+  influxdb2-config:
   grafana-storage:
 
