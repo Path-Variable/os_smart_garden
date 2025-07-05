@@ -72,8 +72,7 @@ The system consists of the following components:
 
 1. Access Grafana at `http://localhost:3001`
 2. Login with credentials from environment variables
-3. Configure InfluxDB data source if not auto-configured
-4. Create dashboards to visualize your IoT data
+3. Access the existing dashboard that is connected to the InfluxDB datasource
 
 ## Data Flow
 
