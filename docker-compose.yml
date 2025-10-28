@@ -1,4 +1,3 @@
-version: '3.9'
 services:
   mosquitto:
     image: eclipse-mosquitto:latest
@@ -33,15 +32,15 @@ services:
         target: /etc/influxdb2
 
   mqtt-publisher:
-    image: mqtt-pub-java:latest
+    image: isaricpv/mqtt-pub-java:latest
+    volumes:
+      - ./mqtt-pub-java-config/:/app/conf
     depends_on:
       - mosquitto
     environment:
-      MQTT_ADDR: tcp://mosquitto:1883
-      MQTT_TOPIC: ${MQTT_TOPIC}
-
+      APP_CONFIG_PATH: /app/conf/config.yml
   mqtt-influx-scrapper:
-    image: mqtt-influx-scrapper:latest
+    image: isaricpv/mqtt-influx-scrapper:latest
     depends_on:
       - mosquitto
       - influxdb
