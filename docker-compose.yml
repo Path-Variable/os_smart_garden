@@ -53,6 +53,24 @@ services:
       INFLUX_BUCKET: ${INFLUXDB_BUCKET}
     secrets:
       - influxdb2-admin-token
+  influxdb-summary-java:
+    image: isaricpv/influxdb-summary-java
+    depends_on:
+      - influxdb
+    environment:
+      INFLUX_URL: http://influxdb:8086
+      INFLUX_TOKEN: ${INFLUXDB_TOKEN}
+      INFLUX_ORG: ${INFLUXDB_ORG}
+      INFLUX_BUCKET: ${INFLUXDB_BUCKET}
+      INFLUX_MEASUREMENT_REGEX: nursery
+      INFLUX_FIELD_REGEX: .*
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      GOOGLE_MODEL: gemini-2.5-flash
+      OUTPUT_MEASUREMENT: dashboard_summary
+      INTERVAL_MINUTES: 15
+      TIMEZONE: CET
+      RUN_ONCE: false
+      SYSTEM_INSTRUCTION: You are an agricultural expert observing a data from a garden nursery
 
   grafana:
     image: grafana/grafana:latest
