@@ -47,6 +47,9 @@ The system consists of the following components:
 | GRAFANA_PASSWORD | Grafana admin password          | adminpassword          |
 | MQTT_TOPIC       | MQTT topic to subscribe/publish | nursery                |
 | INFLUXDB_TOKEN   | InfluxDB authentication token   | MyInitialAdminToken0== |
+| GOOGLE_API_KEY   | Google AI Studio API Key        | none, need account     |
+
+Note: Google Ai Studio has a free tier for demo purposes
 
 ## Services
 
