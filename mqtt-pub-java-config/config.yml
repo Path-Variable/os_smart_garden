@@ -5,14 +5,29 @@ mqtt:
   intervalMs: 1000
 sensors:
   - label: "temperature"
-    min: 15.0
-    max: 35.0
+    min: 20.0
+    max: 25.0
     step: 0.5
-    initial: 25.0
+    initial: 21.0
     integer: false
   - label: "co2Level"
     min: 450
-    max: 1200
+    max: 1300
     step: 50
     initial: 600
     integer: true
+  - label: "soilMoisture"
+    min: 0
+    max: 200
+    step: 5
+    initial: 50
+    integer: true
+  - label: "light"
+    min: 500
+    max: 1000
+    step: 50
+    initial: 500
+    integer: true
+
+
+
